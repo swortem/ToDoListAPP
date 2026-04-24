@@ -58,6 +58,7 @@ object NotificationHelper {
         val intent = Intent(context, NotificationReceiver::class.java).apply {
             putExtra("task_id",    task.id)
             putExtra("task_title", task.title)
+            addFlags(Intent.FLAG_RECEIVER_FOREGROUND)
         }
         val pi = PendingIntent.getBroadcast(
             context, task.id, intent,

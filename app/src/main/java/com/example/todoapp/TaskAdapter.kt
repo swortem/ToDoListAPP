@@ -12,13 +12,16 @@ import androidx.recyclerview.widget.RecyclerView
 class TaskAdapter(
     private val tasks: MutableList<Task>,
     private val onDelete: (Task) -> Unit,
-    private val onToggle: (Task) -> Unit
+    private val onToggle: (Task) -> Unit,
+    private val onEdit: (Task) -> Unit
 ) : RecyclerView.Adapter<TaskAdapter.TaskViewHolder>() {
 
     inner class TaskViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val checkbox:  CheckBox    = view.findViewById(R.id.checkboxDone)
         val title:     TextView    = view.findViewById(R.id.tvTaskTitle)
         val btnDelete: ImageButton = view.findViewById(R.id.btnDelete)
+
+        val btnEdit:    ImageButton = view.findViewById(R.id.btnEdit)
         val tvReminder: TextView   = view.findViewById(R.id.tvReminder)
     }
 
@@ -50,6 +53,7 @@ class TaskAdapter(
 
         holder.checkbox.setOnClickListener { onToggle(task) }
         holder.btnDelete.setOnClickListener { onDelete(task) }
+        holder.btnEdit.setOnClickListener { onEdit(task) }
     }
 
     override fun getItemCount() = tasks.size
