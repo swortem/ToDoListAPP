@@ -28,15 +28,21 @@ class MainActivity : AppCompatActivity() {
         NotificationHelper.createChannel(this)
         requestNotificationPermission()
 
+        val savedTasks = TaskStorage.loadTasks(this)
+        tasks.addAll(savedTasks)
+        nextId = TaskStorage.loadNextId(this)
+
         adapter = TaskAdapter(tasks,
             onDelete = { task ->
                 NotificationHelper.cancelReminder(this, task.id)
                 tasks.remove(task)
                 adapter.notifyDataSetChanged()
+                TaskStorage.saveTasks(this, tasks, nextId)
             },
             onToggle = { task ->
                 task.isCompleted = !task.isCompleted
                 adapter.notifyDataSetChanged()
+                TaskStorage.saveTasks(this, tasks, nextId)
             }
         )
 
@@ -78,6 +84,7 @@ class MainActivity : AppCompatActivity() {
                     val task = Task(nextId++, title, reminderTimeMillis = selectedTimeMs)
                     tasks.add(task)
                     adapter.notifyDataSetChanged()
+                    TaskStorage.saveTasks(this, tasks, nextId)
                     if (selectedTimeMs != null) NotificationHelper.scheduleReminder(this, task)
                 }
             }

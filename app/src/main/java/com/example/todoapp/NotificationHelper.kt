@@ -19,7 +19,7 @@ object NotificationHelper {
         val channel = NotificationChannel(
             CHANNEL_ID,
             CHANNEL_NAME,
-            NotificationManager.IMPORTANCE_DEFAULT
+            NotificationManager.IMPORTANCE_HIGH
         ).apply {
             description = "Reminders for your to-do tasks"
         }
@@ -30,11 +30,22 @@ object NotificationHelper {
     /** Show a notification immediately (e.g. from BroadcastReceiver) */
     fun showNotification(context: Context, taskId: Int, title: String) {
         val nm = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+
+        val openAppIntent = Intent(context, MainActivity::class.java).apply {
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+        }
+        val pendingIntent = PendingIntent.getActivity(
+            context, taskId, openAppIntent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+
         val notification = NotificationCompat.Builder(context, CHANNEL_ID)
             .setSmallIcon(android.R.drawable.ic_popup_reminder)
             .setContentTitle("Task reminder")
             .setContentText(title)
-            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+            .setPriority(NotificationCompat.PRIORITY_HIGH)
+            .setDefaults(NotificationCompat.DEFAULT_ALL)
+            .setContentIntent(pendingIntent)
             .setAutoCancel(true)
             .build()
         nm.notify(taskId, notification)
