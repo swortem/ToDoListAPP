@@ -11,6 +11,7 @@ import android.os.Build
 import android.os.Bundle
 import android.os.PowerManager
 import android.provider.Settings
+import android.view.animation.AnimationUtils
 import android.widget.*
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
@@ -18,16 +19,20 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.google.android.material.button.MaterialButton
+import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
+import com.google.android.material.progressindicator.LinearProgressIndicator
 import java.util.*
 
 class MainActivity : AppCompatActivity() {
 
-    private val allTasks = mutableListOf<Task>()
+    private val allTasks      = mutableListOf<Task>()
     private val filteredTasks = mutableListOf<Task>()
     private lateinit var adapter: TaskAdapter
     private var nextId = 1
-    private var activeFilter: Category? = null  // null = All
+    private var activeFilter: Category? = null
+
+    // Filter chip views
+    private lateinit var filterViews: Map<Category?, TextView>
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -48,6 +53,7 @@ class MainActivity : AppCompatActivity() {
                 allTasks.remove(task)
                 TaskStorage.saveTasks(this, allTasks, nextId)
                 applyFilter()
+                updateSummary()
             },
             onToggle = { task ->
                 val index = allTasks.indexOfFirst { it.id == task.id }
@@ -55,6 +61,7 @@ class MainActivity : AppCompatActivity() {
                     allTasks[index] = task.copy(isCompleted = !task.isCompleted)
                     TaskStorage.saveTasks(this, allTasks, nextId)
                     applyFilter()
+                    updateSummary()
                 }
             },
             onEdit = { task -> showEditTaskDialog(task) }
@@ -65,36 +72,60 @@ class MainActivity : AppCompatActivity() {
             adapter = this@MainActivity.adapter
         }
 
-        // Filter buttons
-        findViewById<Button>(R.id.btnFilterAll).setOnClickListener      { setFilter(null) }
-        findViewById<Button>(R.id.btnFilterPersonal).setOnClickListener { setFilter(Category.PERSONAL) }
-        findViewById<Button>(R.id.btnFilterWork).setOnClickListener     { setFilter(Category.WORK) }
-        findViewById<Button>(R.id.btnFilterShopping).setOnClickListener { setFilter(Category.SHOPPING) }
-        findViewById<Button>(R.id.btnFilterOther).setOnClickListener    { setFilter(Category.OTHER) }
+        // Setup filter chips
+        filterViews = mapOf(
+            null               to findViewById(R.id.btnFilterAll),
+            Category.PERSONAL  to findViewById(R.id.btnFilterPersonal),
+            Category.WORK      to findViewById(R.id.btnFilterWork),
+            Category.SHOPPING  to findViewById(R.id.btnFilterShopping),
+            Category.OTHER     to findViewById(R.id.btnFilterOther)
+        )
+        filterViews.forEach { (cat, view) ->
+            view.setOnClickListener { setFilter(cat) }
+        }
 
-        findViewById<Button>(R.id.btnAdd).setOnClickListener {
+        findViewById<ExtendedFloatingActionButton>(R.id.btnAdd).setOnClickListener {
             showAddTaskDialog()
         }
 
         applyFilter()
+        updateSummary()
     }
 
     private fun setFilter(category: Category?) {
         activeFilter = category
+        // Update tampilan chip aktif/tidak aktif
+        filterViews.forEach { (cat, view) ->
+            if (cat == category) {
+                view.setBackgroundResource(R.drawable.bg_filter_active)
+                view.setTextColor(ContextCompat.getColor(this, android.R.color.white))
+            } else {
+                view.setBackgroundResource(R.drawable.bg_filter_inactive)
+                view.setTextColor(ContextCompat.getColor(this, com.google.android.material.R.color.m3_sys_color_dynamic_dark_on_surface))
+            }
+        }
         applyFilter()
     }
 
     private fun applyFilter() {
         filteredTasks.clear()
-        filteredTasks.addAll(
-            if (activeFilter == null) allTasks
-            else allTasks.filter { it.category == activeFilter }
-        )
+        val source = if (activeFilter == null) allTasks
+        else allTasks.filter { it.category == activeFilter }
+        // Urutkan: belum selesai dulu, lalu by prioritas
+        filteredTasks.addAll(source.sortedWith(compareBy({ it.isCompleted }, { it.priority.ordinal })))
         adapter.notifyDataSetChanged()
     }
 
+    private fun updateSummary() {
+        val total     = allTasks.size
+        val completed = allTasks.count { it.isCompleted }
+        findViewById<TextView>(R.id.tvSummary).text = "$completed of $total tasks completed"
+        val progress  = if (total == 0) 0 else (completed * 100 / total)
+        findViewById<LinearProgressIndicator>(R.id.progressBar).setProgressCompat(progress, true)
+    }
+
     private fun showAddTaskDialog() {
-        val view = layoutInflater.inflate(R.layout.dialog_add_task, null)
+        val view           = layoutInflater.inflate(R.layout.dialog_add_task, null)
         val etTitle        = view.findViewById<EditText>(R.id.etTaskTitle)
         val btnPickTime    = view.findViewById<Button>(R.id.btnPickTime)
         val tvSelectedTime = view.findViewById<TextView>(R.id.tvSelectedTime)
@@ -131,6 +162,7 @@ class MainActivity : AppCompatActivity() {
                     TaskStorage.saveTasks(this, allTasks, nextId)
                     if (selectedTimeMs != null) NotificationHelper.scheduleReminder(this, task)
                     applyFilter()
+                    updateSummary()
                 }
             }
             .setNegativeButton("Cancel", null)
@@ -138,7 +170,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun showEditTaskDialog(task: Task) {
-        val view = layoutInflater.inflate(R.layout.dialog_add_task, null)
+        val view            = layoutInflater.inflate(R.layout.dialog_add_task, null)
         val etTitle         = view.findViewById<EditText>(R.id.etTaskTitle)
         val btnPickTime     = view.findViewById<Button>(R.id.btnPickTime)
         val tvSelectedTime  = view.findViewById<TextView>(R.id.tvSelectedTime)
@@ -147,8 +179,6 @@ class MainActivity : AppCompatActivity() {
         var selectedTimeMs: Long? = task.reminderTimeMillis
 
         setupSpinners(spinnerPriority, spinnerCategory)
-
-        // Pre-fill
         etTitle.setText(task.title)
         spinnerPriority.setSelection(task.priority.ordinal)
         spinnerCategory.setSelection(task.category.ordinal)
@@ -188,6 +218,7 @@ class MainActivity : AppCompatActivity() {
                         if (selectedTimeMs != null) NotificationHelper.scheduleReminder(this, allTasks[index])
                         TaskStorage.saveTasks(this, allTasks, nextId)
                         applyFilter()
+                        updateSummary()
                     }
                 }
             }
@@ -195,7 +226,6 @@ class MainActivity : AppCompatActivity() {
             .show()
     }
 
-    // Helper: reusable date-time picker
     private fun pickDateTime(onPicked: (Long, String) -> Unit) {
         val now = Calendar.getInstance()
         DatePickerDialog(this, { _, y, m, d ->
@@ -207,16 +237,14 @@ class MainActivity : AppCompatActivity() {
         }, now.get(Calendar.YEAR), now.get(Calendar.MONTH), now.get(Calendar.DAY_OF_MONTH)).show()
     }
 
-    // Helper: setup spinner prioritas & kategori
     private fun setupSpinners(spinnerPriority: Spinner, spinnerCategory: Spinner) {
         ArrayAdapter(this, android.R.layout.simple_spinner_item,
             listOf("🔴 High", "🟡 Medium", "🟢 Low")
         ).also {
             it.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
             spinnerPriority.adapter = it
-            spinnerPriority.setSelection(1) // default Medium
+            spinnerPriority.setSelection(1)
         }
-
         ArrayAdapter(this, android.R.layout.simple_spinner_item,
             listOf("👤 Personal", "💼 Work", "🛒 Shopping", "📦 Other")
         ).also {

@@ -4,26 +4,32 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:layout_marginStart="4dp"
+    android:layout_marginEnd="4dp"
     android:layout_marginBottom="8dp"
-    app:cardCornerRadius="12dp"
-    app:cardElevation="3dp">
+    app:cardCornerRadius="16dp"
+    app:cardElevation="2dp"
+    app:strokeWidth="0dp">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal">
 
+        <!-- Strip warna prioritas -->
         <View
             android:id="@+id/priorityStrip"
-            android:layout_width="6dp"
-            android:layout_height="match_parent"
-            android:background="#888888"/>
+            android:layout_width="5dp"
+            android:layout_height="match_parent"/>
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:padding="8dp">
+            android:paddingStart="12dp"
+            android:paddingEnd="8dp"
+            android:paddingTop="12dp"
+            android:paddingBottom="12dp">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -47,23 +53,24 @@
                         android:id="@+id/tvTaskTitle"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:textSize="16sp"
-                        android:textStyle="bold"/>
+                        android:textSize="15sp"
+                        android:textStyle="bold"
+                        android:textColor="?attr/colorOnSurface"/>
 
                     <LinearLayout
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:orientation="horizontal"
-                        android:layout_marginTop="2dp">
+                        android:layout_marginTop="4dp">
 
                         <TextView
                             android:id="@+id/tvCategory"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:textSize="11sp"
-                            android:textColor="#FFFFFF"
-                            android:paddingStart="6dp"
-                            android:paddingEnd="6dp"
+                            android:textSize="10sp"
+                            android:textColor="@color/white"
+                            android:paddingStart="8dp"
+                            android:paddingEnd="8dp"
                             android:paddingTop="2dp"
                             android:paddingBottom="2dp"
                             android:background="@drawable/badge_bg"
@@ -73,10 +80,10 @@
                             android:id="@+id/tvPriority"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:textSize="11sp"
-                            android:textColor="#FFFFFF"
-                            android:paddingStart="6dp"
-                            android:paddingEnd="6dp"
+                            android:textSize="10sp"
+                            android:textColor="@color/white"
+                            android:paddingStart="8dp"
+                            android:paddingEnd="8dp"
                             android:paddingTop="2dp"
                             android:paddingBottom="2dp"
                             android:background="@drawable/badge_bg"/>
@@ -86,19 +93,19 @@
 
                 <ImageButton
                     android:id="@+id/btnEdit"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
+                    android:layout_width="36dp"
+                    android:layout_height="36dp"
                     android:src="@android:drawable/ic_menu_edit"
                     android:background="?attr/selectableItemBackgroundBorderless"
-                    android:contentDescription="Edit task"/>
+                    android:contentDescription="Edit"/>
 
                 <ImageButton
                     android:id="@+id/btnDelete"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
+                    android:layout_width="36dp"
+                    android:layout_height="36dp"
                     android:src="@android:drawable/ic_menu_delete"
                     android:background="?attr/selectableItemBackgroundBorderless"
-                    android:contentDescription="Delete task"/>
+                    android:contentDescription="Delete"/>
 
             </LinearLayout>
 
@@ -106,8 +113,8 @@
                 android:id="@+id/tvReminder"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textSize="12sp"
-                android:textColor="#888888"
+                android:textSize="11sp"
+                android:textColor="?attr/colorOnSurfaceVariant"
                 android:paddingStart="4dp"
                 android:layout_marginTop="4dp"
                 android:visibility="gone"/>

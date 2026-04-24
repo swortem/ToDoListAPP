@@ -1,9 +1,14 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <!-- Base application theme. -->
     <style name="Base.Theme.TodoAPP" parent="Theme.Material3.DayNight.NoActionBar">
-        <!-- Customize your light theme here. -->
-        <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
+        <item name="colorPrimary">@color/primary</item>
+        <item name="colorPrimaryContainer">@color/primary_container</item>
+        <item name="colorSurface">@color/surface</item>
+        <item name="android:statusBarColor">@color/primary</item>
     </style>
 
-    <style name="Theme.TodoAPP" parent="Base.Theme.TodoAPP" />
+    <style name="Theme.TodoAPP" parent="Base.Theme.TodoAPP"/>
+
+    <style name="FABStyle" parent="Widget.Material3.ExtendedFloatingActionButton.Primary">
+        <item name="android:layout_margin">16dp</item>
+    </style>
 </resources>

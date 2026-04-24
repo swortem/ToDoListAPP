@@ -1,14 +1,15 @@
 package com.example.todoapp
 
 import android.content.res.ColorStateList
-import android.graphics.Color
 import android.graphics.Paint
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.animation.AnimationUtils
 import android.widget.CheckBox
 import android.widget.ImageButton
 import android.widget.TextView
+import androidx.core.graphics.toColorInt
 import androidx.recyclerview.widget.RecyclerView
 
 class TaskAdapter(
@@ -38,6 +39,10 @@ class TaskAdapter(
     override fun onBindViewHolder(holder: TaskViewHolder, position: Int) {
         val task = tasks[position]
 
+        // Animasi fade-in tiap item
+        val anim = AnimationUtils.loadAnimation(holder.itemView.context, R.anim.fade_in)
+        holder.itemView.startAnimation(anim)
+
         holder.title.text = task.title
         holder.checkbox.isChecked = task.isCompleted
 
@@ -46,33 +51,29 @@ class TaskAdapter(
         else
             holder.title.paintFlags and Paint.STRIKE_THRU_TEXT_FLAG.inv()
 
-        // ✅ Warna strip & badge prioritas
+        // Prioritas
         val stripColor: String
         val priorityLabel: String
         when (task.priority) {
-            Priority.HIGH   -> { stripColor = "#F44336"; priorityLabel = "🔴 High" }
-            Priority.MEDIUM -> { stripColor = "#FF9800"; priorityLabel = "🟡 Medium" }
-            Priority.LOW    -> { stripColor = "#4CAF50"; priorityLabel = "🟢 Low" }
-            else            -> { stripColor = "#888888"; priorityLabel = "Medium" }
+            Priority.HIGH   -> { stripColor = "#B3261E"; priorityLabel = "🔴 High" }
+            Priority.MEDIUM -> { stripColor = "#E8821A"; priorityLabel = "🟡 Medium" }
+            Priority.LOW    -> { stripColor = "#386A20"; priorityLabel = "🟢 Low" }
         }
-        holder.priorityStrip.setBackgroundColor(Color.parseColor(stripColor))
+        holder.priorityStrip.setBackgroundColor(stripColor.toColorInt())
         holder.tvPriority.text = priorityLabel
-        holder.tvPriority.backgroundTintList =
-            ColorStateList.valueOf(Color.parseColor(stripColor))
+        holder.tvPriority.backgroundTintList = ColorStateList.valueOf(stripColor.toColorInt())
 
-        // ✅ Badge kategori
+        // Kategori
         val categoryColor: String
         val categoryLabel: String
         when (task.category) {
-            Category.PERSONAL -> { categoryColor = "#2196F3"; categoryLabel = "👤 Personal" }
-            Category.WORK     -> { categoryColor = "#9C27B0"; categoryLabel = "💼 Work" }
-            Category.SHOPPING -> { categoryColor = "#009688"; categoryLabel = "🛒 Shopping" }
-            Category.OTHER    -> { categoryColor = "#607D8B"; categoryLabel = "📦 Other" }
-            else              -> { categoryColor = "#607D8B"; categoryLabel = "📦 Other" }
+            Category.PERSONAL -> { categoryColor = "#1565C0"; categoryLabel = "👤 Personal" }
+            Category.WORK     -> { categoryColor = "#6A1B9A"; categoryLabel = "💼 Work" }
+            Category.SHOPPING -> { categoryColor = "#00695C"; categoryLabel = "🛒 Shopping" }
+            Category.OTHER    -> { categoryColor = "#37474F"; categoryLabel = "📦 Other" }
         }
         holder.tvCategory.text = categoryLabel
-        holder.tvCategory.backgroundTintList =
-            ColorStateList.valueOf(Color.parseColor(categoryColor))
+        holder.tvCategory.backgroundTintList = ColorStateList.valueOf(categoryColor.toColorInt())
 
         // Reminder
         if (task.reminderTimeMillis != null) {
@@ -83,7 +84,7 @@ class TaskAdapter(
             holder.tvReminder.visibility = View.GONE
         }
 
-        holder.checkbox.setOnClickListener { onDelete(task) }
+        holder.checkbox.setOnClickListener { onToggle(task) }
         holder.btnDelete.setOnClickListener { onDelete(task) }
         holder.btnEdit.setOnClickListener   { onEdit(task) }
     }
