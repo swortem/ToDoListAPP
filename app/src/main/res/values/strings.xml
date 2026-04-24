@@ -1,3 +1,8 @@
 <resources>
     <string name="app_name">TodoAPP</string>
+    <string name="empty_title">No tasks yet!</string>
+    <string name="empty_subtitle">Tap the + button to add your first task</string>
+    <string name="task_deleted">Task deleted</string>
+    <string name="undo">Undo</string>
+    <string name="search_hint">Search tasks…</string>
 </resources>
